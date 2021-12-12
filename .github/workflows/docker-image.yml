@@ -1,15 +1,35 @@
 name: Build Docker Image
 
+permissions:
+  contents: read
+  id-token: write
+
 on:
   workflow_dispatch:
   
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
+
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag sample-dotnet:$(date +%s)
+      run: docker build . --file Dockerfile --tag sample-dotnet:${{ github.run_number }}${{ github.run_attempt }}
+
+    - name: Login to az cli
+      uses: azure/login@v1
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        
+    - name: Login to acr
+      run: az acr login -n zarennerrealmacr
+      
+    - name: Publish image
+      run: docker tag sample-dotnet:${{ github.run_number }}${{ github.run_attempt }} zarennerrealmacr.azurecr.io/sample-dotnet:${{ github.run_number }}${{ github.run_attempt }}
+      
+    - name: Publish image
+      run: docker push zarennerrealmacr.azurecr.io/sample-dotnet:${{ github.run_number }}${{ github.run_attempt }}
+
