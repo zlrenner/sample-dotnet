@@ -10,7 +10,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    environment: publish
     steps:
     - uses: actions/checkout@v2
 
@@ -27,7 +27,7 @@ jobs:
     - name: Login to acr
       run: az acr login -n zarennerrealmacr
       
-    - name: Publish image
+    - name: Tag image
       run: docker tag sample-dotnet:${{ github.run_number }}${{ github.run_attempt }} zarennerrealmacr.azurecr.io/sample-dotnet:${{ github.run_number }}${{ github.run_attempt }}
       
     - name: Publish image
